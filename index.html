@@ -1,0 +1,163 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>입주민 확인 시스템</title>
+    <style>
+        body {
+            font-family: 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f4f4f9;
+        }
+
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            width: 300px;
+            text-align: center;
+        }
+
+        h2 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-sizing: border-box; /* 패딩 포함 크기 계산 */
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: background 0.3s;
+        }
+
+            button:hover {
+                background-color: #0056b3;
+            }
+
+            button:disabled {
+                background-color: #ccc;
+                cursor: not-allowed;
+            }
+
+        #resultArea {
+            margin-top: 20px;
+            font-weight: bold;
+            font-size: 16px;
+            min-height: 24px;
+        }
+
+        .success {
+            color: #28a745;
+        }
+
+        .fail {
+            color: #dc3545;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>입주민 조회</h2>
+
+        <div class="input-group">
+            <label for="dong">동</label>
+            <input type="text" id="dong" placeholder="예: 101">
+        </div>
+
+        <div class="input-group">
+            <label for="ho">호</label>
+            <input type="text" id="ho" placeholder="예: 1204">
+        </div>
+
+        <div class="input-group">
+            <label for="name">이름</label>
+            <input type="text" id="name" placeholder="입주민 성함">
+        </div>
+
+        <button onclick="checkResident()" id="searchBtn">확인하기</button>
+
+        <div id="resultArea"></div>
+    </div>
+
+    <script>
+        // ▼▼▼ 여기에 아까 복사한 구글 웹 앱 URL을 붙여넣으세요 ▼▼▼
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw-1ec_RAi69HohxxudI4h8AxlJasLjS2UU7WdGxFUT0YuqG3L0CDMJQaDjIi_QlYc/exec";
+
+        async function checkResident() {
+            const dong = document.getElementById('dong').value.trim();
+            const ho = document.getElementById('ho').value.trim();
+            const name = document.getElementById('name').value.trim();
+            const resultArea = document.getElementById('resultArea');
+            const btn = document.getElementById('searchBtn');
+
+            // 유효성 검사
+            if (!dong || !ho || !name) {
+                alert("동, 호, 이름을 모두 입력해주세요.");
+                return;
+            }
+
+            // 로딩 표시
+            btn.disabled = true;
+            btn.innerText = "조회 중...";
+            resultArea.innerHTML = "";
+
+            try {
+                // 구글 서버로 요청 보내기
+                // URL에 파라미터를 붙여서 보냅니다
+                const targetUrl = `${GOOGLE_SCRIPT_URL}?dong=${encodeURIComponent(dong)}&ho=${encodeURIComponent(ho)}&name=${encodeURIComponent(name)}`;
+
+                const response = await fetch(targetUrl);
+                const data = await response.json(); // JSON 결과 받기
+
+                // 결과 출력
+                if (data.success) {
+                    resultArea.innerHTML = `<span class="success">✅ ${data.message}</span>`;
+                } else {
+                    resultArea.innerHTML = `<span class="fail">❌ ${data.message}</span>`;
+                }
+
+            } catch (error) {
+                console.error("Error:", error);
+                resultArea.innerHTML = `<span class="fail">서버 연결에 실패했습니다.</span>`;
+            } finally {
+                // 버튼 상태 복구
+                btn.disabled = false;
+                btn.innerText = "확인하기";
+            }
+        }
+    </script>
+</body>
+</html>
