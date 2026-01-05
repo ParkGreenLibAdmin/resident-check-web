@@ -3,7 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>입주민 확인 시스템</title>
+    <title>입주민(세대주) 확인 시스템</title>
+
+    <link rel="icon" type="image/x-icon" href="greenLibLogo.ico">
+
     <style>
         body {
             font-family: 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
@@ -46,8 +49,14 @@
             padding: 10px;
             border: 1px solid #ddd;
             border-radius: 5px;
-            box-sizing: border-box; /* 패딩 포함 크기 계산 */
+            box-sizing: border-box;
+            outline: none; /* 포커스 시 기본 테두리 제거 */
         }
+            /* 입력창 포커스 효과 */
+            input:focus {
+                border-color: #007bff;
+                box-shadow: 0 0 5px rgba(0,123,255,0.2);
+            }
 
         button {
             width: 100%;
@@ -66,9 +75,10 @@
                 background-color: #0056b3;
             }
 
+            /* 1. 대기 상태 스타일 (버튼 비활성 + 커서 변경) */
             button:disabled {
                 background-color: #ccc;
-                cursor: not-allowed;
+                cursor: wait; /* 버튼 위에 있을 때 대기 커서 */
             }
 
         #resultArea {
@@ -94,17 +104,17 @@
 
         <div class="input-group">
             <label for="dong">동</label>
-            <input type="text" id="dong" placeholder="예: 101">
+            <input type="text" id="dong" class="search-input" placeholder="예: 101">
         </div>
 
         <div class="input-group">
             <label for="ho">호</label>
-            <input type="text" id="ho" placeholder="예: 1204">
+            <input type="text" id="ho" class="search-input" placeholder="예: 1204">
         </div>
 
         <div class="input-group">
             <label for="name">이름</label>
-            <input type="text" id="name" placeholder="입주민 성함">
+            <input type="text" id="name" class="search-input" placeholder="입주민 성함">
         </div>
 
         <button onclick="checkResident()" id="searchBtn">확인하기</button>
@@ -113,36 +123,50 @@
     </div>
 
     <script>
-        // ▼▼▼ 여기에 아까 복사한 구글 웹 앱 URL을 붙여넣으세요 ▼▼▼
+        // ▼▼▼ 구글 웹 앱 URL로 교체 필수 ▼▼▼
         const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw-1ec_RAi69HohxxudI4h8AxlJasLjS2UU7WdGxFUT0YuqG3L0CDMJQaDjIi_QlYc/exec";
+
+        // 모든 입력창 요소 가져오기
+        const inputs = document.querySelectorAll('.search-input');
+        const resultArea = document.getElementById('resultArea');
+
+        // [기능 추가] 이벤트 리스너 등록
+        inputs.forEach(input => {
+            // 2. 입력창을 클릭(포커스)하면 결과 메시지 초기화
+            input.addEventListener('focus', () => {
+                resultArea.innerHTML = "";
+            });
+
+            // 3. 엔터키 누르면 자동 검색
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    checkResident();
+                }
+            });
+        });
 
         async function checkResident() {
             const dong = document.getElementById('dong').value.trim();
             const ho = document.getElementById('ho').value.trim();
             const name = document.getElementById('name').value.trim();
-            const resultArea = document.getElementById('resultArea');
             const btn = document.getElementById('searchBtn');
 
-            // 유효성 검사
             if (!dong || !ho || !name) {
                 alert("동, 호, 이름을 모두 입력해주세요.");
                 return;
             }
 
-            // 로딩 표시
-            btn.disabled = true;
-            btn.innerText = "조회 중...";
-            resultArea.innerHTML = "";
+            // 1. [시작] 대기 상태 UI 적용
+            btn.disabled = true;           // 버튼 클릭 방지
+            btn.innerText = "조회 중...";   // 텍스트 변경
+            document.body.style.cursor = 'wait'; // 화면 전체 커서를 '대기(모래시계)'로 변경
 
             try {
-                // 구글 서버로 요청 보내기
-                // URL에 파라미터를 붙여서 보냅니다
                 const targetUrl = `${GOOGLE_SCRIPT_URL}?dong=${encodeURIComponent(dong)}&ho=${encodeURIComponent(ho)}&name=${encodeURIComponent(name)}`;
 
                 const response = await fetch(targetUrl);
-                const data = await response.json(); // JSON 결과 받기
+                const data = await response.json();
 
-                // 결과 출력
                 if (data.success) {
                     resultArea.innerHTML = `<span class="success">✅ ${data.message}</span>`;
                 } else {
@@ -153,9 +177,10 @@
                 console.error("Error:", error);
                 resultArea.innerHTML = `<span class="fail">서버 연결에 실패했습니다.</span>`;
             } finally {
-                // 버튼 상태 복구
+                // 1. [종료] 대기 상태 해제
                 btn.disabled = false;
                 btn.innerText = "확인하기";
+                document.body.style.cursor = 'default'; // 커서 원상복구
             }
         }
     </script>
