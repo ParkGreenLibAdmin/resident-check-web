@@ -27,10 +27,19 @@
             text-align: center;
         }
 
-        h2 {
+        .brand-header {
+            font-size: 18px;
+            color: #0E3E3E;
+            font-weight: bold;
+            margin-bottom: 0;    /* 기존 5px에서 0으로 변경 (여백 제거) */
+            line-height: 1.2;    /* 글자 자체의 위아래 불필요한 공백 제거 */
+        }
+   h2 {
+            margin-top: 5px;     /* 위쪽 여백을 0에서 5px 정도로 살짝 조정하여 자연스럽게 연결 */
             margin-bottom: 20px;
             color: #333;
-        }
+            line-height: 1.2;    /* 제목의 줄 높이도 타이트하게 설정 */
+   }
 
         .input-group {
             margin-bottom: 15px;
@@ -54,14 +63,14 @@
         }
             /* 입력창 포커스 효과 */
             input:focus {
-                border-color: #007bff;
+                border-color: #00D09E;
                 box-shadow: 0 0 5px rgba(0,123,255,0.2);
             }
 
         button {
             width: 100%;
             padding: 12px;
-            background-color: #007bff;
+            background-color: #0E3E3E;
             color: white;
             border: none;
             border-radius: 5px;
@@ -72,7 +81,7 @@
         }
 
             button:hover {
-                background-color: #0056b3;
+                background-color: #00D09E;
             }
 
             /* 1. 대기 상태 스타일 (버튼 비활성 + 커서 변경) */
@@ -100,7 +109,10 @@
 <body>
 
     <div class="container">
-        <h2>입주민 조회</h2>
+        <div class="brand-header">
+            🏢 기흥역 파크푸르지오
+        </div>
+        <h2>세대주 조회</h2>
 
         <div class="input-group">
             <label for="dong">동</label>
